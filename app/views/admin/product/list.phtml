@@ -1,0 +1,294 @@
+<div class="row">
+    <div class="col-sm-6">
+        <h1><i class="fa fa-cubes"></i> Manage Products</h1>
+    </div>
+    <div class="col-sm-6 text-sm-right">
+        <a href="#modalAddProduct" class="btn btn-lg btn-primary" data-toggle="modal" data-backdrop="static">
+            <i class="fa fa-plus"></i> Add New Product
+        </a>
+    </div>
+</div>
+<hr />
+<?php if($data['error']){ ?>
+    <div class="alert alert-danger">
+        <h4>
+            <i class="fa fa-exclamation-triangle"></i> Failed to load product list. Please re-try by refreshing the page.
+        </h4>
+    </div>
+<?php } ?>
+<table class="table table-bordered table-striped">
+    <thead>
+        <tr>
+            <th>S No.</th>
+            <th>Product Name</th>
+            <th>Category</th>
+            <th class="text-center">Cost Price</th>
+            <th class="text-center">Selling Price</th>
+            <th class="text-center">Status</th>
+            <th>&nbsp;</th>
+        </tr>
+    </thead>
+    <tbody>
+        <?php if(count($data['records']) == 0): ?>
+            <tr><td colspan="7" class="text-center">No product has been added yet!</td></tr>
+        <?php else: ?>
+            <?php $counter = $data['recordCounter']; foreach($data['records'] as $product): ?>
+                <tr>
+                    <td><?php echo $counter++ ?>.</td>
+                    <td>
+                        <img alt="" src="/uploads/<?php echo $product->getImage() ?>" class="mr-2 border rounded" style="height: 35px;" />
+                        <?php echo $product->getName() ?>
+                    </td>
+                    <td><?php echo $product->getCategory()->getName() ?></td>
+                    <td class="text-center"><i class="fa fa-rupee"></i> <?php echo number_format($product->getCostPrice(), 2) ?></td>
+                    <td class="text-center"><i class="fa fa-rupee"></i> <?php echo number_format($product->getSellingPrice(), 2) ?></td>
+                    <td class="text-center">
+                        <?php if($product->getIsInStock()): ?>
+                            <span class="badge badge-success">In Stock</span>
+                        <?php else: ?>
+                            <span class="badge badge-warning">Out Of Stock</span>
+                        <?php endif; ?>
+                        <?php if($product->getIsActive()): ?>
+                            <span class="badge badge-success">Active</span>
+                        <?php else: ?>
+                            <span class="badge badge-danger">InActive</span>
+                        <?php endif; ?>
+                    </td>
+                    <td class="text-right">
+                        <div class="btn-group btn-group-sm">
+                            <button type="button" class="btn btn-primary" onclick="doEditProduct(<?php echo $product->getId() ?>)">
+                                <i class="fa fa-edit"></i>
+                            </button>
+                            <button type="button" class="btn btn-danger" onclick="doDeleteProduct(<?php echo $product->getId() ?>)">
+                                <i class="fa fa-times"></i>
+                            </button>
+                        </div>
+                    </td>
+                </tr>
+            <?php endforeach; ?>
+        <?php endif; ?>
+    </tbody>
+</table>
+<?php if($data['totalPages'] > 1): ?>
+<nav>
+    <ul class="pagination pagination-sm">
+        <?php for($pageCounter = 1; $pageCounter <= $data['totalPages']; $pageCounter++): ?>
+            <?php if($pageCounter == $data['currentPage']): ?>
+        <li class="page-item active">
+            <a href="#" class="page-link"><?php echo $pageCounter ?></a>
+        </li>
+            <?php else: ?>
+        <li class="page-item">
+            <a href="/admin/product/list<?php echo ($pageCounter == 1 ? '' : '?page='.$pageCounter) ?>" class="page-link"><?php echo $pageCounter ?></a>
+        </li>
+            <?php endif; ?>
+        <?php endfor; ?>
+    </ul>
+</nav>
+<?php endif; ?>
+
+<!-- Modal: Add Product -->
+<form method="post" onsubmit="doAddProduct(this); return false;">
+    <div class="modal fade" id="modalAddProduct" data-backdrop="static">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">
+                        <i class="fa fa-plus"></i>
+                        Add Product
+                    </h5>
+                </div>
+                <div class="modal-body">
+                    <div class="form-group row">
+                        <label class="col-form-label col-sm-4" for="categoryId">Product Category:</label>
+                        <div class="col-sm-8">
+                            <select name="categoryId" id="categoryId" class="form-control" required>
+                                <option value="">--- Select Category ---</option>
+                                <?php foreach($data['categories'] as $category): ?>
+                                    <option value="<?php echo $category->getId() ?>">
+                                        <?php echo $category->getName(); ?>
+                                    </option>
+                                <?php endforeach; ?>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-group row">
+                        <label class="col-form-label col-sm-4" for="productName">Product Name:</label>
+                        <div class="col-sm-8">
+                            <input type="text" name="productName" id="productName" class="form-control" placeholder="Product Name"/>
+                        </div>
+                    </div>
+                    <div class="form-group row">
+                        <label class="col-form-label col-sm-4" for="description">Description:</label>
+                        <div class="col-sm-8">
+                            <textarea class="form-control" name="description" id="description" rows="2"></textarea>
+                        </div>
+                    </div>
+
+                    <div class="form-group row">
+                        <label class="col-form-label col-sm-4" for="costPrice">Cost Price:</label>
+                        <div class="input-group col-sm-8">
+                            <div class="input-group-prepend">
+                                <span class="input-group-text">Rs.</span>
+                            </div>
+                            <input type="number" name="costPrice" id="costPrice" min="0" step="1" class="form-control" aria-label="Amount"/>
+                            <div class="input-group-append">
+                                <span class="input-group-text">.00</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-group row">
+                        <label class="col-form-label col-sm-4" for="sellPrice">Selling Price:</label>
+                        <div class="input-group col-sm-8">
+                            <div class="input-group-prepend">
+                                <span class="input-group-text">Rs.</span>
+                            </div>
+                            <input type="number" name="sellingPrice" id="sellPrice" min="0" step="1" class="form-control" aria-label="Amount"/>
+                            <div class="input-group-append">
+                                <span class="input-group-text">.00</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group row">
+                        <label class="col-form-label col-sm-4" for="productImage">Product Image:</label>
+                        <div class="col-sm-8">
+                            <input type="file" id="productImage" name="productImage" class="form-control" required>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group row">
+                        <label class="col-form-label col-sm-4">Is In Stock?</label>
+                        <div class="col-sm-8">
+                            <div class="form-check form-check-inline">
+                                <input class="form-check-input" type="radio" name="isInStock" id="isInStockYes" value="yes">
+                                <label class="form-check-label" for="isInStockYes">Yes, Is in stock</label>
+                            </div>
+                            <div class="form-check form-check-inline">
+                                <input class="form-check-input" type="radio" name="isInStock" id="isInStockNo" checked="" value="no">
+                                <label class="form-check-label" for="isInStockNo">No</label>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group row">
+                        <label class="col-form-label col-sm-4">Is Active?</label>
+                        <div class="col-sm-8">
+                            <div class="form-check form-check-inline">
+                                <input class="form-check-input" type="radio" name="isActive" id="isActiveYes" value="yes">
+                                <label class="form-check-label" for="isActiveYes">Yes, Display on website</label>
+                            </div>
+                            <div class="form-check form-check-inline">
+                                <input class="form-check-input" type="radio" name="isActive" id="isActiveNo" value="no">
+                                <label class="form-check-label" for="isActiveNo">No</label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="submit" id="btnAddProduct" class="btn btn-primary">
+                        <i class="fa fa-check"></i> Add
+                    </button>
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">
+                        <i class="fa fa-times"></i> Cancel
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</form>
+
+<?php \OS\helpers\ViewRenderer::registerHook("FooterCode", function(){ ?>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.iframe-transport/1.0.1/jquery.iframe-transport.min.js" 
+        integrity="sha512-F0YcX2AHb/Dowr81zGNBSWLyZoTLXQI4L7Fm6SRoJWfyAWl/q+MW5fJ+Df9jof4TczPLew1vN1t4WtMRr+gPNA==" 
+        crossorigin="anonymous"></script>
+    <script>
+        function doAddProduct(form){
+            $.ajax({
+                url: '/admin/product/add',
+                type: 'post',
+                dataType: 'json',
+                data: $(form).find('[type="text"], select, textarea, [type="number"], [type="radio"]').serializeArray(),
+                files: $(form).find('[type="file"]'),
+                iframe: true,
+                processData: false,
+                beforeSend: function(){
+                    $('#btnAddProduct').html('<i class="fa fa-cog fa-spin"></i> Please wait...');
+                },
+                complete: function(){
+                    $('#btnAddProduct').html('<i class="fa fa-check"></i> Add');
+                },
+                success: function(response){
+                    if(response.error){
+                        swal({
+                            title: 'Error Encountered!',
+                            type: 'error',
+                            text: response.errorMessage
+                        });
+                    }else if(response.success){
+                        $('#modalAddProduct').modal('hide');
+                        swal({
+                            title: 'Product Added Successfully!',
+                            text: '',
+                            type: 'success'
+                        }, function(){
+                            location.href = location.href;
+                        });
+                    }
+                }
+            });
+        }
+        function doEditProduct(recordId){
+            $.ajax({
+                url: '/admin/product/edit/' + recordId,
+                type: 'get',
+                dataType: 'html',
+                beforeSend: function(){
+                    NProgress.start();
+                },
+                complete: function(){
+                    NProgress.done();
+                },
+                success: function(html){
+                    $('body').append(html);
+                    let modal = $('#modalEditProduct');
+                    if(modal.length > 0)
+                        modal.modal('show');
+                }
+            });
+        }
+        function doDeleteProduct(recordId){
+            if(!confirm('Are you sure to delete this product?')) return;
+            $.ajax({
+                url: '/admin/product/delete/' + recordId,
+                type: 'post',
+                dataType: 'json',
+                beforeSend: function(){
+                    NProgress.start();
+                },
+                complete: function(){
+                    NProgress.done();
+                },
+                success: function(response){
+                    if(response.error){
+                        swal({
+                            title: 'Error Encountered!',
+                            type: 'error',
+                            text: response.errorMessage
+                        });
+                    }else if(response.success){
+                        swal({
+                            title: 'Product Deleted Successfully!',
+                            text: '',
+                            type: 'success'
+                        }, function(){
+                            location.href = location.href;
+                        });
+                    }
+                }
+            });
+        }
+    </script>
+<?php }) ?>
+

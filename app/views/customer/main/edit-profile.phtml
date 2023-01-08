@@ -1,0 +1,185 @@
+<?php if($data['error']): ?>
+<div class="alert alert-danger">
+    <h3><?php echo $data['errorMessage'] ?></h3>
+    <p>Refresh the page to re-try again.</p>
+</div>
+<?php endif; ?>
+<?php
+        /** @var \OS\models\Customer $customer */
+        $customer = $data['customer'];
+?>
+<div id="editProfileContainer">
+    <form method="post" onsubmit="doSaveProfile(this); return false;">
+        <div class="card">
+            <div class="card-header">
+                <i class="fa fa-edit"></i> Edit Profile
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-sm-6">
+                        <div class="form-group">
+                            <label for="firstName">First Name</label>
+                            <input type="text" name="firstName" id="firstName" class="form-control" value="<?php echo $customer->getFirstName(); ?>" required>
+                        </div>
+                    </div>
+                    <div class="col-sm-6">
+                        <div class="form-group">
+                            <label for="lastName">Last Name</label>
+                            <input type="text" name="lastName" id="lastName" class="form-control" value="<?php echo $customer->getLastName(); ?>" required>
+                        </div>
+                    </div>
+                </div>
+                <br />
+                <div class="row">
+                    <div class="col-sm-6">
+                        <label for="email">Email Address</label>
+                        <input type="email" name="emailAddress" id="email" class="form-control" value="<?php echo $customer->getEmailAddress(); ?>" readonly>
+                    </div>
+                </div>
+                <br />
+                <div class="row">
+                    <div class="col-sm-6">
+                        <div class="form-group">
+                            <label for="mobileNumber">Mobile Number</label>
+                            <input type="text" name="mobileNumber" id="mobileNumber" class="form-control" value="<?php echo $customer->getMobileNumber(); ?>" required>
+                        </div>
+                    </div>
+                    <div class="col-sm-6">
+                        <div class="form-group">
+                            <label for="alternateNumber">Alternate Number</label>
+                            <input type="text" name="alternateNumber" id="alternateNumber" class="form-control" value="<?php echo $customer->getAlternateNumber(); ?>" placeholder="( Optional )">
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="card-footer">
+                <button type="submit" class="btn btn-primary">
+                    <i class="fa fa-check"></i> Save
+                </button>
+            </div>
+        </div>
+    </form>
+</div>
+<br />
+<form method="post" onsubmit="doSaveBillingAddress(this); return false;">
+    <div class="card">
+        <div class="card-header">
+            <h5><i class="fa fa-edit"></i> Edit Billing Address</h5>
+        </div>
+        <div class="card-body">
+            <?php
+                $billingAddress = null;
+                if($customer->hasBillingAddress()){
+                    $billingAddress = $customer->getBillingAddress();
+                }
+            ?>
+            <div class="row">
+                <div class="col-sm-6">
+                    <div class="form-group">
+                        <label for="billingName">Billing Name</label>
+                        <input type="text" name="billingName" id="billingName" class="form-control" required value="<?php echo (is_null($billingAddress) ? '' : $billingAddress->getBillingName()) ?>">
+                    </div>
+                </div>
+            </div>
+            <div class="form-group">
+                <label for="addressLine1">Address Line #1</label>
+                <input class="form-control" id="addressLine1" name="addressLine1" required type="text"
+                       value="<?php echo (is_null($billingAddress) ? '' : $billingAddress->getAddressLine1()) ?>">
+            </div>
+            <div class="form-group">
+                <label for="addressLine2">Address Line #2</label>
+                <input class="form-control" id="addressLine2" name="addressLine2" placeholder="( Optional )" required
+                       type="text"
+                       value="<?php echo (is_null($billingAddress) ? '' : $billingAddress->getAddressLine2()) ?>">
+            </div>
+            <div class="row">
+                <div class="col-sm-4">
+                    <div class="form-group">
+                        <label for="city">City</label>
+                        <input class="form-control" id="city" name="city" required type="text"
+                               value="<?php echo (is_null($billingAddress) ? '' : $billingAddress->getCity()) ?>">
+                    </div>
+                </div>
+                <div class="col-sm-4">
+                    <div class="form-group">
+                        <label for="state">State</label>
+                        <input class="form-control" id="state" name="state" required type="text"
+                               value="<?php echo (is_null($billingAddress) ? '' : $billingAddress->getState()) ?>">
+                    </div>
+                </div>
+                <div class="col-sm-4">
+                    <div class="form-group">
+                        <label for="country">Country</label>
+                        <input class="form-control" id="country" name="country" required type="text"
+                               value="<?php echo (is_null($billingAddress) ? '' : $billingAddress->getCountry()) ?>">
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-sm-4">
+                    <div class="form-group">
+                        <label for="pincode">Pincode</label>
+                        <input class="form-control" id="pincode" name="pincode" required type="text"
+                               value="<?php echo (is_null($billingAddress) ? '' : $billingAddress->getPincode()) ?>">
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="card-footer">
+            <button type="submit" class="btn btn-primary">
+                <i class="fa fa-check"></i> Save
+            </button>
+        </div>
+    </div>
+</form>
+
+<?php \OS\helpers\ViewRenderer::registerHook("FooterCode", function(){ ?>
+    <script>
+        function doSaveProfile(form){
+            let btn = $(form).find('button[type="submit"]');
+            $(btn).html('<i class="fa fa-cog fa-spin"></i> Please wait...');
+            $.post(
+                '/customer/save-profile',
+                $(form).serialize(),
+                function (d){
+                    if(d.error){
+                        swal('Error Encountered!', d.errorMessage, 'error');
+                    }else if(d.success){
+                        swal({
+                            title: 'Profile Saved Successfully!',
+                            text: '',
+                            type: 'success'
+                        }, function (){
+                            location["href"] = location.href;
+                        });
+                    }
+                }
+            ).always(function(){
+                $(btn).html('<i class="fa fa-check"></i> Save');
+            });
+        }
+        function doSaveBillingAddress(form){
+            let btn = $(form).find('button[type="submit"]');
+            $(btn).html('<i class="fa fa-cog fa-spin"></i> Please wait...');
+            $.post(
+                '/customer/save-billing-address',
+                $(form).serialize(),
+                function(d){
+                    if(d.error){
+                        swal('Error Encountered!', d.errorMessage, 'error');
+                    }else if(d.success){
+                        swal({
+                            title: 'Billing Address Saved Successfully!',
+                            text: '',
+                            type: 'success'
+                        }, function (){
+                            location["href"] = location.href;
+                        });
+                    }
+                }
+            ).always(function(){
+                $(btn).html('<i class="fa fa-check"></i> Save');
+            });
+        }
+    </script>
+<?php }); ?>

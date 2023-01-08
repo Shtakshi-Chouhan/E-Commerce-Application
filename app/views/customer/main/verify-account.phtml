@@ -1,0 +1,19 @@
+<div class="container">
+    <?php if($data['error']): ?>
+    <div class="alert alert-danger">
+        <i class="fa fa-exclamation-triangle"></i>
+        <?php echo $data['errorMessage'] ?>
+    </div>
+    <?php endif; ?>
+    <?php if($data['verificationSuccess']): ?>
+    <div class="alert alert-success">
+        <i class="fa fa-check-circle"></i>
+        Your account has been successfully verified. Please click the button below to continue.
+    </div>
+    <?php endif; ?>
+    <div class="mt-3">
+        <a href="/customer" class="btn btn-primary btn-lg">
+            <i class="fa fa-sign-in-alt"></i> Go To Login Page
+        </a>
+    </div>
+</div>

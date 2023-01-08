@@ -1,0 +1,193 @@
+<?php
+    /** @var array $data */
+?>
+<div class="row">
+    <div class="col-sm-6">
+        <h1><i class="fa fa-cubes"></i> Manage Admin User</h1>
+    </div>
+    <div class="col-sm-6 text-sm-right">
+        <a href="#modalAddUser" class="btn btn-lg btn-primary" data-toggle="modal" data-backdrop="static">
+            <i class="fa fa-plus"></i> Add New User
+        </a>
+    </div>
+</div>
+<hr />
+<?php if($data['error']): ?>
+<div class="alert alert-danger">
+    <i class="fa fa-exclamation-triangle"></i> Failed to load admin user list. Please re-try again.
+</div>
+<?php endif; ?>
+<table class="table table-bordered table-striped">
+    <thead>
+        <tr>
+            <th>S No.</th>
+            <th>Name</th>
+            <th>Email Address</th>
+            <th>Status</th>
+            <th>Last Login</th>
+            <th>&nbsp;</th>
+        </tr>
+    </thead>
+    <tbody>
+        <?php if(count($data['records']) > 0): ?>
+            <?php
+                /** @var  \OS\models\AdminUser $record */
+                $recordCounter = 1; foreach ($data['records'] as $record):
+                    if($record->getIsSuperAdmin()) continue;
+            ?>
+                <tr>
+                    <td><?php echo $recordCounter++; ?>.</td>
+                    <td><?php echo $record->getName() ?></td>
+                    <td><?php echo $record->getEmailAddress() ?></td>
+                    <td class="text-center">
+                        <?php if($record->getIsActive()): ?>
+                            <span class="badge badge-success">Account Active</span>
+                        <?php else: ?>
+                            <span class="badge badge-danger">Account Disabled</span>
+                        <?php endif; ?>
+                    </td>
+                    <td>
+                        <?php echo $record->getLastLoginOn('d/m/Y'); ?>
+                    </td>
+                    <td class="text-right">
+                        <div class="btn-group btn-group-sm">
+                            <button type="button" class="btn btn-primary" onclick="doRecordAction(<?php echo $record->getId() ?>, 'edit')">
+                                <i class="fa fa-edit"></i>
+                            </button>
+                            <button type="button" class="btn btn-danger" onclick="doRecordAction(<?php echo $record->getId() ?>, 'delete')">
+                                <i class="fa fa-times"></i>
+                            </button>
+                        </div>
+                    </td>
+                </tr>
+            <?php endforeach; ?>
+        <?php else: ?>
+            <tr>
+                <td colspan="6" class="text-center">
+                    No admin user has been added yet!
+                </td>
+            </tr>
+        <?php endif; ?>
+    </tbody>
+</table>
+
+<form method="post" onsubmit="doAddUser(this); return false;">
+    <div id="modalAddUser" class="modal fade" data-backdrop="static">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">
+                        <i class="fa fa-plus"></i> Add Admin User
+                    </h5>
+                </div>
+                <div class="modal-body">
+                    <p>All fields are mandatory.</p>
+                    <div class="form-group row">
+                        <label class="col-form-label col-sm-4" for="userName">User Name:</label>
+                        <div class="col-sm-8">
+                            <input type="text" name="userName" id="userName" class="form-control" required>
+                        </div>
+                    </div>
+                    <div class="form-group row">
+                        <label class="col-form-label col-sm-4" for="userEmail">Email Address:</label>
+                        <div class="col-sm-8">
+                            <input type="email" name="userEmail" id="userEmail" class="form-control" required>
+                        </div>
+                    </div>
+                    <div class="form-group row">
+                        <label class="col-form-label col-sm-4" for="password">Password:</label>
+                        <div class="col-sm-8">
+                            <input type="password" name="password" id="password" class="form-control" required minlength="8">
+                        </div>
+                    </div>
+                    <div class="form-group row">
+                        <label class="col-form-label col-sm-4" for="confirmPassword">Confirm Password:</label>
+                        <div class="col-sm-8">
+                            <input type="password" name="confirmPassword" id="confirmPassword" class="form-control" required minlength="8">
+                        </div>
+                    </div>
+                    <div class="form-group row">
+                        <label class="col-form-label col-sm-4" for="password">Account Active?</label>
+                        <div class="col-sm-8">
+                            <div class="custom-control custom-radio custom-control-inline">
+                                <input type="radio" id="radioIsActiveYes" name="isActive" value="yes" checked class="custom-control-input">
+                                <label class="custom-control-label" for="radioIsActiveYes">Yes, Account Active</label>
+                            </div>
+                            <div class="custom-control custom-radio custom-control-inline">
+                                <input type="radio" id="radioIsActiveNo" name="isActive" value="no" class="custom-control-input">
+                                <label class="custom-control-label" for="radioIsActiveNo">No, Account Disabled</label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button id="btnAddUser" type="submit" class="btn btn-primary">
+                        <i class="fa fa-check"></i> Add
+                    </button>
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">
+                        <i class="fa fa-times"></i> Cancel
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</form>
+
+<?php \OS\helpers\ViewRenderer::registerHook("FooterCode", function(){ ?>
+    <script>
+        function doAddUser(form){
+            $.ajax({
+                url: '/admin/admin-user/add',
+                type: 'post',
+                dataType: 'json',
+                data: $(form).serialize(),
+                beforeSend: function(){
+                    $('#btnAddUser').html('<i class="fa fa-cog fa-spin"></i> Please wait...');
+                },
+                complete: function(){
+                    $('#btnAddUser').html('<i class="fa fa-check"></i> Add');
+                },
+                success: function(d){
+                    if(d.error){
+                        swal('Error Encoutnered!', d.errorMessage, 'error');
+                    }else if(d.success){
+                        swal({
+                            title: 'User Account Added Successfully!',
+                            text: '',
+                            type: 'success'
+                        }, function(){
+                            location['href'] = location.href;
+                        });
+                    }
+                }
+            });
+        }
+        function doRecordAction(recordId, action){
+            switch(action){
+                case 'edit': {
+                    $.ajax({
+                        url: '/admin/admin-user/edit/' + recordId,
+                        type: 'get',
+                        dataType: 'html',
+                        beforeSend: function(){
+                            NProgress.start();
+                        },
+                        complete: function(){
+                            NProgress.done();
+                        },
+                        success: function(html){
+                            $('body').append(html);
+                            let modal = $('#modalEditUser');
+                            if(modal.length > 0)
+                                modal.modal('show');
+                        }
+                    });
+                    break;
+                }
+                case 'delete': {
+
+                }
+            }
+        }
+    </script>
+<?php }); ?>

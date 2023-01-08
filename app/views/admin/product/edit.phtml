@@ -1,0 +1,190 @@
+<div id="editProductWrapper">
+
+    <?php if($data['error']): ?>
+        <div class="modal fade" id="modalEditProduct" data-backdrop="static">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header bg-danger text-white">
+                        <i class="fa fa-exclamation-triangle"></i> Error Encountered!
+                    </div>
+                    <div class="modal-body">
+                        <p>Failed to load product details for modification. Please close this dialog and try once again.</p>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-dismiss="">
+                            <i class="fa fa-times"></i> Close
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    <?php else: $product = $data['product']; ?>
+        <form method="post" onsubmit="saveProduct(this); return false;">
+            <div class="modal fade" id="modalEditProduct" data-backdrop="static">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title">
+                                <i class="fa fa-edit"></i>
+                                Edit Product
+                            </h5>
+                        </div>
+                        <div class="modal-body">
+                            <div class="form-group row">
+                                <label class="col-form-label col-sm-4" for="eCategoryId">Product Category:</label>
+                                <div class="col-sm-8">
+                                    <select name="categoryId" id="eCategoryId" class="form-control" required>
+                                        <option value="">--- Select Category ---</option>
+                                        <?php foreach($data['categories'] as $category): ?>
+                                            <?php if($product->getCategoryId() == $category->getId()): ?>
+                                                <option value="<?php echo $category->getId() ?>" selected=""><?php echo $category->getName() ?></option>
+                                            <?php else: ?>
+                                                <option value="<?php echo $category->getId() ?>"><?php echo $category->getName() ?></option>
+                                            <?php endif; ?>
+                                        <?php endforeach; ?>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="form-group row">
+                                <label class="col-form-label col-sm-4" for="eProductName">Product Name:</label>
+                                <div class="col-sm-8">
+                                    <input type="text" name="productName" id="eProductName" class="form-control" placeholder="Product Name" 
+                                        value="<?php echo $product->getName() ?>"/>
+                                </div>
+                            </div>
+                            <div class="form-group row">
+                                <label class="col-form-label col-sm-4" for="eDescription">Description:</label>
+                                <div class="col-sm-8">
+                                    <textarea class="form-control" name="description" id="eDescription" rows="2"><?php
+                                        echo $product->getDescription(); ?></textarea>
+                                </div>
+                            </div>
+
+                            <div class="form-group row">
+                                <label class="col-form-label col-sm-4" for="eCostPrice">Cost Price:</label>
+                                <div class="input-group col-sm-8">
+                                    <div class="input-group-prepend">
+                                        <span class="input-group-text">Rs.</span>
+                                    </div>
+                                    <input type="number" name="costPrice" id="eCostPrice" min="0" step="1" class="form-control" aria-label="Amount"
+                                        value="<?php echo $product->getCostPrice() ?>" />
+                                    <div class="input-group-append">
+                                        <span class="input-group-text">.00</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="form-group row">
+                                <label class="col-form-label col-sm-4" for="eSellPrice">Selling Price:</label>
+                                <div class="input-group col-sm-8">
+                                    <div class="input-group-prepend">
+                                        <span class="input-group-text">Rs.</span>
+                                    </div>
+                                    <input type="number" name="sellingPrice" id="eSellPrice" min="0" step="1" class="form-control" aria-label="Amount"
+                                        value="<?php echo $product->getSellingPrice() ?>" />
+                                    <div class="input-group-append">
+                                        <span class="input-group-text">.00</span>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="form-group row">
+                                <label class="col-form-label col-sm-4" for="eProductImage">Product Image:</label>
+                                <div class="col-sm-8">
+                                    <img alt="" src="/uploads/<?php echo $product->getImage() ?>" class="img-fluid mb-3" />
+                                    <input type="file" id="eProductImage" name="productImage" class="form-control">
+                                </div>
+                            </div>
+
+                            <div class="form-group row">
+                                <label class="col-form-label col-sm-4">Is In Stock?</label>
+                                <div class="col-sm-8">
+                                    <div class="form-check form-check-inline">
+                                        <input class="form-check-input" type="radio" name="isInStock" id="eIsInStockYes" value="yes"
+                                            <?php if($product->getIsInStock()): ?>checked=""<?php endif; ?>>
+                                        <label class="form-check-label" for="eIsInStockYes">Yes, Is in stock</label>
+                                    </div>
+                                    <div class="form-check form-check-inline">
+                                        <input class="form-check-input" type="radio" name="isInStock" id="eIsInStockNo" value="no"
+                                            <?php if(!$product->getIsInStock()): ?>checked=""<?php endif; ?>>
+                                        <label class="form-check-label" for="eIsInStockNo">No</label>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="form-group row">
+                                <label class="col-form-label col-sm-4">Is Active?</label>
+                                <div class="col-sm-8">
+                                    <div class="form-check form-check-inline">
+                                        <input class="form-check-input" type="radio" name="isActive" id="eIsActiveYes" value="yes"
+                                            <?php if($product->getIsActive()): ?>checked=""<?php endif; ?>>
+                                        <label class="form-check-label" for="eIsActiveYes">Yes, Display on website</label>
+                                    </div>
+                                    <div class="form-check form-check-inline">
+                                        <input class="form-check-input" type="radio" name="isActive" id="eIsActiveNo" value="no"
+                                            <?php if(!$product->getIsActive()): ?>checked=""<?php endif; ?>>
+                                        <label class="form-check-label" for="eIsActiveNo">No</label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="submit" id="eBtnEditProduct" class="btn btn-primary">
+                                <i class="fa fa-check"></i> Save
+                            </button>
+                            <button type="button" class="btn btn-secondary" data-dismiss="modal">
+                                <i class="fa fa-times"></i> Cancel
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </form>
+
+        <script>
+            function saveProduct(form){
+                $.ajax({
+                    url: '/admin/product/save/<?php echo $data['product']->getId(); ?>',
+                    type: 'post',
+                    dataType: 'json',
+                    iframe: true,
+                    processData: false,
+                    data: $(form).find('[type="text"], [type="number"], select, textarea, [type="radio"]').serializeArray(),
+                    files: $(form).find('[type="file"]'),
+                    beforeSend: function(){
+                        $('#btnEditProduct').html('<i class="fa fa-cog fa-spin"></i> Please wait...');
+                    },
+                    complete: function(){
+                        $('#btnEditProduct').html('<i class="fa fa-check"></i> Save');
+                    },
+                    success: function(response){
+                        if(response.error){
+                            swal({
+                                title: 'Error Encountered!',
+                                type: 'error',
+                                text: response.errorMessage
+                            });
+                        }else if(response.success){
+                            $('#modalEditProduct').modal('hide');
+                            swal({
+                                title: 'Product Saved Successfully!',
+                                text: '',
+                                type: 'success'
+                            }, function(){
+                                location.href = location.href;
+                            })
+                        }
+                    }
+                });
+            }
+        </script>
+
+    <?php endif; ?>
+
+    <script>
+        $('#modalEditProduct').on('hidden.bs.modal', function(){
+            $('#editProductWrapper').remove(); 
+        });
+    </script>
+
+</div>

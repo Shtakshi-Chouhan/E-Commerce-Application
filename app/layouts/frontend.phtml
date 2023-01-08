@@ -1,0 +1,236 @@
+<?php
+/** @var array $data */
+/** @var string $content */
+?>
+<!doctype html>
+<html lang="en">
+<head>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+    <link crossorigin="anonymous" href="https://cdnjs.cloudflare.com/ajax/libs/bootswatch/4.6.0/united/bootstrap.min.css"
+          integrity="sha512-D/XTI3HHxegvO0hcG75yd++4QyP+AM5IqkxFRu1KBhBQYwxYdWi+JP9DlBppR3GiMBXlAZWuw2qmHQWobofXQA=="
+          rel="stylesheet"/>
+    <link crossorigin="anonymous" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css"
+          integrity="sha512-SfTiTlX6kk+qitfevl/7LibUOeJWlt9rbyDn92a1DqWOw9vWG2MFoays0sgObmWazO5BQPiFucnnEAjpAB+/Sw=="
+          rel="stylesheet"/>
+    <link crossorigin="anonymous" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-sweetalert/1.0.1/sweetalert.min.css"
+          integrity="sha512-hwwdtOTYkQwW2sedIsbuP1h0mWeJe/hFOfsvNKpRB3CkRxq8EW7QMheec1Sgd8prYxGm1OM9OZcGW7/GUud5Fw=="
+          rel="stylesheet"/>
+    <link crossorigin="anonymous" href="https://cdnjs.cloudflare.com/ajax/libs/nprogress/0.2.0/nprogress.min.css"
+          integrity="sha512-42kB9yDlYiCEfx2xVwq0q7hT4uf26FUgSIZBK8uiaEnTdShXjwr8Ip1V4xGJMg3mHkUt9nNuTDxunHF0/EgxLQ=="
+          rel="stylesheet"/>
+    <link rel="stylesheet" href="/assets/css/style.css?_4pid5SXDCAVj" />
+
+    <title><?php echo ($data['pageTitle'] ?? ''); ?>  | eCommerce Shop</title>
+
+</head>
+<body>
+<nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+    <a class="navbar-brand" href="/">eCommerce Shop</a>
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarColor01" aria-controls="navbarColor01" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+    </button>
+
+    <div class="collapse navbar-collapse" id="navbarColor01">
+        <ul class="navbar-nav mr-auto">
+            <li class="nav-item <?php if($data['currentMenuItem'] === 'home'): ?>active<?php endif; ?>">
+                <a class="nav-link" href="/">
+                    <i class="fa fa-home"></i> Home
+                    <span class="sr-only">(current)</span>
+                </a>
+            </li>
+            <li class="nav-item dropdown <?php if($data['currentMenuItem'] === 'category'): ?>active<?php endif; ?>">
+                <a aria-expanded="false" aria-haspopup="true" class="nav-link dropdown-toggle" data-toggle="dropdown" href="#"
+                   id="navbarDropdown" role="button">
+                    Categories
+                </a>
+                <div class="dropdown-menu" aria-labelledby="navbarDropdown">
+                    <?php if(isset($data['categories'])): ?>
+                        <?php foreach ($data['categories'] as $record): ?>
+                            <?php if($record->getIsActive() === false) continue; ?>
+                            <a class="dropdown-item" href="/category/<?php echo $record->getId(); ?>">
+                                <?php echo $record->getName(); ?>
+                            </a>
+                        <?php endforeach; ?>
+                    <?php endif; ?>
+                </div>
+            </li>
+            <li class="nav-item <?php if($data['currentMenuItem'] === 'about'): ?>active<?php endif; ?>">
+                <a class="nav-link" href="/about">About Us
+                    <span class="sr-only">(current)</span>
+                </a>
+            </li>
+            <li class="nav-item <?php if($data['currentMenuItem'] === 'contact'): ?>active<?php endif; ?>">
+                <a class="nav-link" href="/contact-us">Contact Us
+                    <span class="sr-only">(current)</span>
+                </a>
+            </li>
+        </ul>
+        <ul class="navbar-nav ml-auto">
+            <li class="nav-item">
+                <a class="nav-link" href="/cart/show">
+                    <i class="fa fa-shopping-cart"></i> Cart
+                    ( <?php echo $_SESSION['cart']->totalItems ?? 0 ?> )
+                </a>
+            </li>
+            <?php if($_SESSION['customerLoggedIn']): ?>
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" data-toggle="dropdown" href="#" role="button" aria-haspopup="true" aria-expanded="false">
+                        <i class="fa fa-user"></i> <?php echo $_SESSION['customerName'] ?>
+                    </a>
+                    <div class="dropdown-menu dropdown-menu-right">
+                        <a class="dropdown-item" href="/customer/dashboard">My Account</a>
+                        <a class="dropdown-item" href="/customer/profile">My Profile</a>
+                        <a class="dropdown-item" href="/customer/orders">My Orders</a>
+                        <a class="dropdown-item" href="#modalChangeCustomerPassword" data-toggle="modal">Change Password</a>
+                        <div class="dropdown-divider"></div>
+                        <a class="dropdown-item" href="javascript:;" onclick="doCustomerLogout()">Logout</a>
+                    </div>
+                </li>
+            <?php else: ?>
+                <li class="nav-item">
+                    <a class="nav-link" href="/customer">Login</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/customer">Register</a>
+                </li>
+            <?php endif; ?>
+        </ul>
+    </div>
+</nav>
+
+<br />
+
+<div class="container mb-5">
+    <?php echo $content ?>
+</div>
+
+<script crossorigin="anonymous"
+        integrity="sha512-bLT0Qm9VnAYZDflyKcBaQ2gg0hSYNQrJ8RilYldYQ1FxQYoCLtUjuuRuZo+fjqhx/qtq/1itJ0C2ejDxltZVFg=="
+        src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+<script crossorigin="anonymous"
+        integrity="sha512-wV7Yj1alIZDqZFCUQJy85VN+qvEIly93fIQAN7iqDFCPEucLCeNFz4r35FCo9s6WrpdDQPi80xbljXB8Bjtvcg=="
+        src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.6.0/js/bootstrap.bundle.min.js"></script>
+<script crossorigin="anonymous"
+        integrity="sha512-MqEDqB7me8klOYxXXQlB4LaNf9V9S0+sG1i8LtPOYmHqICuEZ9ZLbyV3qIfADg2UJcLyCm4fawNiFvnYbcBJ1w=="
+        src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-sweetalert/1.0.1/sweetalert.min.js"></script>
+<script crossorigin="anonymous"
+        integrity="sha512-bUg5gaqBVaXIJNuebamJ6uex//mjxPk8kljQTdM1SwkNrQD7pjS+PerntUSD+QRWPNJ0tq54/x4zRV8bLrLhZg=="
+        src="https://cdnjs.cloudflare.com/ajax/libs/nprogress/0.2.0/nprogress.min.js"></script>
+
+<!-- Modal: Change Password -->
+<form method="post" onsubmit="doChangePassword(this); return false;">
+    <input type="hidden" name="recordAction" value="changePassword">
+    <div class="modal fade" id="modalChangeCustomerPassword" data-backdrop="static">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">
+                        <i class="fa fa-edit"></i> Change Password
+                    </h5>
+                </div>
+                <div class="modal-body">
+                    <div class="form-group row">
+                        <label class="col-form-label col-sm-4" for="currentPassword">Current Password:</label>
+                        <div class="col-sm-8">
+                            <input type="password" name="currentPassword" id="currentPassword" class="form-control" required>
+                        </div>
+                    </div>
+                    <div class="form-group row">
+                        <label class="col-form-label col-sm-4" for="newPassword">New Password:</label>
+                        <div class="col-sm-8">
+                            <input type="password" name="newPassword" id="newPassword" class="form-control" required>
+                        </div>
+                    </div>
+                    <div class="form-group row">
+                        <label class="col-form-label col-sm-4" for="rePassword">Re-Enter Password:</label>
+                        <div class="col-sm-8">
+                            <input type="password" name="rePassword" id="rePassword" class="form-control" required>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button id="btnChangePassword" type="submit" class="btn btn-primary">
+                        <i class="fa fa-check"></i> Change
+                    </button>
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">
+                        <i class="fa fa-times"></i> Cancel
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</form>
+
+<script>
+    function doCustomerLogout(){
+        if(!confirm('Are you sure to logout?')) return;
+        $.ajax({
+            url: '/customer/logout',
+            type: 'POST',
+            dataType: 'json',
+            data: { recordAction: 'logout' },
+            beforeSend: function(){
+                NProgress.start();
+            },
+            success: function(response){
+                if(response.error){
+                    swal({
+                        title: 'Error Encountered!',
+                        text: response.errorMessage,
+                        type: 'error'
+                    });
+                }else if(response.success){
+                    swal({
+                        title: 'Logged Out Successfully!',
+                        text: '',
+                        type: 'success'
+                    }, function(){
+                        location.href = "/customer";
+                    });
+                }
+            },
+            complete: function(){
+                NProgress.done();
+            }
+        });
+    }
+    function doChangePassword(form){
+        $.ajax({
+            url: '/customer/change-password',
+            type: 'post',
+            dataType: 'json',
+            data: $(form).serialize(),
+            beforeSend: function(){
+                $('#btnChangePassword').html('<i class="fa fa-cog fa-spin"></i> Please wait...');
+            },
+            complete: function(){
+                $('#btnChangePassword').html('<i class="fa fa-check"></i> Change');
+            },
+            success: function(response){
+                if(response.error){
+                    swal({
+                        title: 'Error Encountered!',
+                        text: response.errorMessage,
+                        type: 'error'
+                    });
+                }else if(response.success){
+                    swal({
+                        title: 'Password Changed Successfully',
+                        text: 'You have been logged out automatically for security reason and will be redirected to login page. Please re-login again to continue.',
+                        type: 'success'
+                    }, function(){
+                        location.href = '/test-slim-project/login';
+                    });
+                }
+            }
+        });
+    }
+</script>
+
+<?php \OS\helpers\ViewRenderer::renderHook('FooterCode'); ?>
+
+</body>
+</html>

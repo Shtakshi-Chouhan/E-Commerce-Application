@@ -1,0 +1,95 @@
+<div class="container">
+    <h2>
+        Products in "<?php echo $data['currentCategory']->getName() ?>
+    </h2>
+    <?php if($data["error"]): ?>
+        <div class="alert alert-danger">
+            <i class="fa fa-exclamation-triangle"></i> Something went wrong while loading data.
+            Please refresh page to try again.
+        </div>
+    <?php endif; ?>
+    <br />
+    <div class="productList">
+        <?php foreach($data['products'] as $record): ?>
+            <div class="productEntry p-3 overflow-hidden">
+                <div class="imageBox mb-3">
+                    <img alt="" src="/uploads/<?php echo $record->getImage() ?>">
+                </div>
+                <h5 class="text-center">
+                    <?php echo $record->getName() ?>
+                </h5>
+                <div class="priceBox text-center m-2">
+                    <i class="fa fa-rupee"></i> <?php echo number_format((float)$record->getSellingPrice(), 2); ?>
+                </div>
+                <?php if($record->getIsInStock()): ?>
+                    <div class="addToCartBox text-center">
+                        <button type="button" class="btn btn-primary" onclick="addToCart(<?php echo $record->getId() ?>)">
+                            <i class="fa fa-cart-plus"></i> Add To Cart
+                        </button>
+                    </div>
+                <?php else: ?>
+                    <div class="text-center">
+                        <span class="badge-pill badge-warning text-dark" style="font-size: 18px;">Out Of Stock</span>
+                    </div>
+                <?php endif; ?>
+            </div>
+        <?php endforeach; ?>
+    </div>
+    <br />
+    <?php if($data['totalPages'] > 1): ?>
+        <hr />
+        <nav class="m-auto">
+            <ol class="pagination pagination-lg">
+                <?php for ($pageCounter = 1; $pageCounter <= $data['totalPages']; $pageCounter++): ?>
+                    <?php if($pageCounter == $data['currentPage']): ?>
+                        <li class="page-item active">
+                            <a href="#" class="page-link"><?php echo $pageCounter ?></a>
+                        </li>
+                    <?php else: ?>
+                        <li class="page-item">
+                            <a class="page-link" href="/<?php echo ( $pageCounter == 1 ? '' : '?p='.$pageCounter) ?>">
+                                <?php echo $pageCounter ?>
+                            </a>
+                        </li>
+                    <?php endif; ?>
+                <?php endfor; ?>
+            </ol>
+        </nav>
+    <?php endif; ?>
+</div>
+
+<?php \OS\helpers\ViewRenderer::registerHook("FooterCode", function(){ ?>
+    <script>
+        function addToCart(productId){
+            $.ajax({
+                url: '/cart/add',
+                type: 'post',
+                dataType: 'json',
+                data: { pId: productId },
+                beforeSend: function(){
+                    NProgress.start();
+                },
+                complete: function (){
+                    NProgress.done();
+                },
+                success: function(d){
+                    if(d.error){
+                        swal({
+                            title: 'Error Encountered!',
+                            text: 'Failed to add product to cart. Please re-try again.',
+                            type: 'error'
+                        });
+                    }else if(d.success){
+                        swal({
+                            title: 'Product Added To Cart.',
+                            text: '',
+                            type: 'success'
+                        }, function(){
+                            location['href'] = location.href;
+                        });
+                    }
+                }
+            });
+        }
+    </script>
+<?php }); ?>

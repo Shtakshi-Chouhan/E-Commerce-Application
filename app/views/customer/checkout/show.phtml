@@ -1,0 +1,256 @@
+<div class="container">
+    <h2>Checkout</h2>
+    <hr />
+    <?php
+        /** @var \OS\models\Customer $customer */
+        $customer = $data['customer'];
+        $billingAddress = null;
+        if($customer->hasBillingAddress())
+            $billingAddress = $customer->getBillingAddress();
+    ?>
+    <form method="post" onsubmit="doCheckout(this); return false;">
+        <div class="row">
+            <div class="col-sm-7">
+                <div class="card mb-3">
+                    <div class="card-header">
+                        <h4>Billing Address</h4>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-sm-6">
+                                <div class="form-group">
+                                    <label for="billingName">Billing Name</label>
+                                    <input type="text" name="billingName" id="billingName" class="form-control" required value="<?php echo (is_null($billingAddress) ? '' : $billingAddress->getBillingName()) ?>">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="addressLine1">Address Line #1</label>
+                            <input class="form-control" id="addressLine1" name="addressLine1" required type="text"
+                                   value="<?php echo (is_null($billingAddress) ? '' : $billingAddress->getAddressLine1()) ?>">
+                        </div>
+                        <div class="form-group">
+                            <label for="addressLine2">Address Line #2</label>
+                            <input class="form-control" id="addressLine2" name="addressLine2" placeholder="( Optional )"
+                                   type="text"
+                                   value="<?php echo (is_null($billingAddress) ? '' : $billingAddress->getAddressLine2()) ?>">
+                        </div>
+                        <div class="row">
+                            <div class="col-sm-4">
+                                <div class="form-group">
+                                    <label for="city">City</label>
+                                    <input class="form-control" id="city" name="city" required type="text"
+                                           value="<?php echo (is_null($billingAddress) ? '' : $billingAddress->getCity()) ?>">
+                                </div>
+                            </div>
+                            <div class="col-sm-4">
+                                <div class="form-group">
+                                    <label for="state">State</label>
+                                    <input class="form-control" id="state" name="state" required type="text"
+                                           value="<?php echo (is_null($billingAddress) ? '' : $billingAddress->getState()) ?>">
+                                </div>
+                            </div>
+                            <div class="col-sm-4">
+                                <div class="form-group">
+                                    <label for="country">Country</label>
+                                    <input class="form-control" id="country" name="country" required type="text"
+                                           value="<?php echo (is_null($billingAddress) ? '' : $billingAddress->getCountry()) ?>">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-sm-4">
+                                <div class="form-group">
+                                    <label for="pincode">Pincode</label>
+                                    <input class="form-control" id="pincode" name="pincode" required type="text"
+                                           value="<?php echo (is_null($billingAddress) ? '' : $billingAddress->getPincode()) ?>">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="card">
+                    <div class="card-header">
+                        <div class="d-flex justify-content-between">
+                            <h4>Shipping Address</h4>
+                            <div>
+                                <a href="/customer/shipping-address" class="btn btn-sm btn-primary">
+                                    <i class="fa fa-plus"></i> Add New Address
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <table class="table table-striped">
+                        <?php
+                            $shippingAddresses = $customer->getAllShippingAddress();
+                            foreach($shippingAddresses as $record):
+                        ?>
+                            <tr>
+                                <td>
+                                    <label class="d-flex align-items-center">
+                                        <input type="radio" name="shippingAddress" value="<?php echo $record->getId() ?>">
+                                        <span class="ml-2">
+                                            <?php if($record->getType() == "home"): ?>
+                                                <span class="badge badge-primary">Home</span>
+                                            <?php elseif($record->getType() == "office"): ?>
+                                                <span class="badge badge-info">Office</span>
+                                            <?php else: ?>
+                                                <span class="badge badge-secondary">Other</span>
+                                            <?php endif; ?>
+                                            <?php
+                                                echo $record->getFirstName(). ' '.$record->getLastName() . ', ' .
+                                                    $record->getAddressLine1() . ', ' .
+                                                    $record->getAddressLine2() . ', ' .
+                                                    $record->getCity() . ', ' . $record->getState() . ', ' . $record->getCountry() . ', ' .
+                                                    'Pincode: '.$record->getPincode() . '<br />' .
+                                                    '<strong>Landmark: </strong>' . $record->getLandmark();
+                                            ?>
+                                        </span>
+                                    </label>
+                                </td>
+                            </tr>
+                        <?php endforeach; ?>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            <div class="col-sm-5">
+                <div class="card">
+                    <div class="card-header">
+                        <h4>Your Cart</h4>
+                    </div>
+                    <div class="card-body">
+                        <table class="table-striped table">
+                            <tbody>
+                            <?php
+                                $cart = $_SESSION['cart'] ?? (object)['totalItems' => 0, 'products' => []];
+                                $conn = $data['conn'];
+                                $totalAmount = 0;
+                                foreach($cart->products as $entry):
+                            ?>
+                                <tr>
+                                    <td>
+                                        <?php
+                                            $productId = $entry['id'];
+                                            $qty = $entry['qty'];
+                                            $product = (new \OS\models\ProductQuery($conn))->findById($productId);
+                                        ?>
+                                        <div class="d-flex">
+                                            <div style="width: 100px;">
+                                                <img alt="" src="/uploads/<?php echo $product->getImage() ?>" style="max-width: 150px; max-height: 50px;">
+                                            </div>
+                                            <div class="ml-2">
+                                                <div><?php echo $product->getName() ?></div>
+                                                <div>Quantity: <?php echo $qty ?></div>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td class="text-right">
+                                        <i class="fa fa-rupee"></i>
+                                        <?php
+                                            $productTotalPrice = ($qty * $product->getSellingPrice());
+                                            $totalAmount += $productTotalPrice;
+                                            echo number_format($productTotalPrice, 2);
+                                        ?>
+                                    </td>
+                                </tr>
+                            <?php endforeach; ?>
+                            </tbody>
+                            <tfoot class="text-right">
+                                <tr>
+                                    <td class="text-right">
+                                        <strong>Total Amount:</strong>
+                                    </td>
+                                    <td>
+                                        <i class="fa fa-rupee"></i>
+                                        <?php echo number_format($totalAmount, 2) ?>
+                                    </td>
+                                </tr>
+                                <?php
+                                    $totalTaxes = ($totalAmount * TAX_RATE);
+                                    $shippingCharges = ($cart->totalItems > 3 ? SHIPPING_CHARGES_ABOVE_3 : SHIPPING_CHARGES_BELOW_3);
+                                    $amountToPay = $totalAmount + $totalTaxes + $shippingCharges;
+                                ?>
+                                <tr>
+                                    <td class="text-right">
+                                        <strong>Total Taxes:</strong>
+                                    </td>
+                                    <td>
+                                        <i class="fa fa-rupee"></i>
+                                        <?php echo number_format($totalTaxes, 2) ?>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="text-right">
+                                        <strong>Shipping Charges:</strong>
+                                    </td>
+                                    <td>
+                                        <i class="fa fa-rupee"></i>
+                                        <?php echo number_format($shippingCharges, 2) ?>
+                                    </td>
+                                </tr>
+                                <tr style="font-size: 125%;">
+                                    <td class="text-right">
+                                        <strong>Amount To Pay:</strong>
+                                    </td>
+                                    <td>
+                                        <i class="fa fa-rupee"></i>
+                                        <?php echo number_format($amountToPay, 2) ?>
+                                    </td>
+                                </tr>
+                            </tfoot>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <br />
+        <div class="card">
+            <div class="card-header">
+                <h4>Select Payment Option</h4>
+            </div>
+            <div class="card-body">
+                <div>
+                    <label>
+                        <input type="radio" name="paymentOption" value="cod" checked> Cash On Delivery ( COD )
+                    </label>
+                </div>
+            </div>
+        </div>
+        <div class="text-center mt-3">
+            <button type="submit" class="btn btn-primary btn-lg">
+                <i class="fa fa-check"></i> Checkout &amp; Place Order
+            </button>
+        </div>
+    </form>
+</div>
+
+<?php \OS\helpers\ViewRenderer::registerHook("FooterCode", function(){ ?>
+<script>
+    function doCheckout(form){
+        let btn = $(form).find('[type="submit"]');
+        $(btn).html('<i class="fa fa-cog fa-spin"></i> Please wait...');
+        if(!confirm('Are you sure to continue?')) return;
+        $.post(
+            '/customer/place-order',
+            $(form).serialize(),
+            function(d){
+                if(d.error){
+                    swal('Error Encountered!', d.errorMessage, 'error');
+                }else if(d.success){
+                    swal({
+                        title: 'Order Placed Successfully!',
+                        text: '',
+                        type: 'success'
+                    }, function(){
+                        location["href"] = "/customer/orders";
+                    });
+                }
+            }
+        ).always(function (){
+            $(btn).html('<i class="fa fa-check"></i> Checkout & Place Order');
+        });
+    }
+</script>
+<?php }); ?>

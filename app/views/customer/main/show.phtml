@@ -1,0 +1,248 @@
+<div class="container mb-5 mt-5">
+
+    <div class="row">
+
+        <div class="col-sm-6">
+            <form method="post" onsubmit="doLogin(this); return false;">
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="mb-0">
+                            <i class="fa fa-lock"></i> Customer Login
+                        </h3>
+                    </div>
+                    <div class="card-body">
+                        <div class="form-group row">
+                            <label class="col-form-label col-sm-4" for="loginEmailAddress">Email Address</label>
+                            <div class="col-sm-8">
+                                <input type="email" id="loginEmailAddress" name="emailAddress" required class="form-control">
+                            </div>
+                        </div>
+                        <div class="form-group row">
+                            <label class="col-form-label col-sm-4" for="loginPassword">Password</label>
+                            <div class="col-sm-8">
+                                <input type="password" id="loginPassword" name="password" required class="form-control">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card-footer">
+                        <div class="d-flex justify-content-between">
+                            <button id="btnLogin" type="submit" class="btn btn-primary">
+                                <i class="fa fa-check"></i> Login
+                            </button>
+                            <button id="btnVerification" type="button" onclick="resendVerificationEmail(this)" class="btn btn-primary d-none">
+                                <i class="fa fa-refresh"></i> Resend Verification Email
+                            </button>
+                            <button type="button" class="btn btn-secondary" onclick="customerForgotPassword(this);">
+                                Forgot Password?
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </form>
+        </div>
+
+        <div class="col-sm-6">
+            <form method="post" onsubmit="doRegister(this); return false;">
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="mb-0">
+                            <i class="fa fa-user-plus"></i> Customer Registration
+                        </h3>
+                    </div>
+                    <div class="card-body">
+                        <div class="form-group row">
+                            <label class="col-form-label col-sm-4" for="firstName">First Name</label>
+                            <div class="col-sm-8">
+                                <input type="text" id="firstName" name="firstName" required class="form-control">
+                            </div>
+                        </div>
+                        <div class="form-group row">
+                            <label class="col-form-label col-sm-4" for="lastName">Last Name</label>
+                            <div class="col-sm-8">
+                                <input type="text" id="lastName" name="lastName" required class="form-control">
+                            </div>
+                        </div>
+                        <div class="form-group row">
+                            <label class="col-form-label col-sm-4" for="emailAddress">Email Address</label>
+                            <div class="col-sm-8">
+                                <input type="email" id="emailAddress" name="emailAddress" required class="form-control">
+                            </div>
+                        </div>
+                        <div class="form-group row">
+                            <label class="col-form-label col-sm-4" for="mobileNumber">Mobile Number</label>
+                            <div class="col-sm-8">
+                                <input type="tel" id="mobileNumber" name="mobileNumber" required class="form-control" minlength="10" maxlength="10" placeholder="10-digits mobile number">
+                            </div>
+                        </div>
+                        <div class="form-group row">
+                            <label class="col-form-label col-sm-4" for="aMobileNumber">Alternate Mobile Number</label>
+                            <div class="col-sm-8">
+                                <input type="tel" id="aMobileNumber" name="aMobileNumber" required class="form-control" minlength="10" maxlength="10" placeholder="10-digits mobile number">
+                            </div>
+                        </div>
+                        <div class="form-group row">
+                            <label class="col-form-label col-sm-4" for="password">Password</label>
+                            <div class="col-sm-8">
+                                <input type="password" id="password" name="password" required class="form-control">
+                            </div>
+                        </div>
+                        <div class="form-group row">
+                            <label class="col-form-label col-sm-4" for="confirmPassword">Confirm Password</label>
+                            <div class="col-sm-8">
+                                <input type="password" id="confirmPassword" name="confirmPassword" required class="form-control">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card-footer">
+                        <div class="d-flex justify-content-between">
+                            <button id="btnRegisterAccount" type="submit" class="btn btn-primary">
+                                <i class="fa fa-check"></i> Register
+                            </button>
+                            <button type="button" class="btn btn-secondary" onclick="$(this).closest('form').get(0).reset();">
+                                Reset Form
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </form>
+        </div>
+
+    </div>
+
+</div>
+
+<?php \OS\helpers\ViewRenderer::registerHook("FooterCode", function(){ ?>
+<script>
+    function doLogin(form){
+        $.ajax({
+            url: "/customer/login",
+            type: "post",
+            dataType: "json",
+            data: $(form).serialize(),
+            beforeSend: function(){
+                $('#btnLogin').html('<i class="fa fa-cog fa-spin"></i> Please wait...');
+            },
+            complete: function (){
+                $('#btnLogin').html('<i class="fa fa-check"></i> Login');
+            },
+            success: function(d){
+                if(d.error){
+                    if(d.accountVerified === false){
+                        $('#btnVerification').removeClass("d-none");
+                    }else{
+                        $('#btnVerification').addClass("d-none");
+                    }
+                    swal({
+                        title: 'Error Encountered!',
+                        text: d.errorMessage,
+                        type: 'error'
+                    });
+                }else if(d.success){
+                    swal({
+                        title: 'Login Successful!',
+                        text: '',
+                        type: 'success'
+                    }, function(){
+                        location.href = '<?php echo (isset($_REQUEST['_r']) ? urldecode($_REQUEST['_r']) : '/customer/dashboard') ?>';
+                    });
+                }
+            }
+        });
+    }
+    function doRegister(form){
+        $.ajax({
+            url: "/customer/register",
+            type: "post",
+            dataType: "json",
+            data: $(form).serialize(),
+            beforeSend: function (){
+                $('#btnRegisterAccount').html('<i class="fa fa-cog fa-spin"></i> Please wait...');
+            },
+            complete: function(){
+                $('#btnRegisterAccount').html('<i class="fa fa-check"></i> Register');
+            },
+            success: function(d){
+                if(d.error){
+                    swal({
+                        title: 'Error Encountered!',
+                        text: d.errorMessage,
+                        type: 'error'
+                    });
+                }else if(d.success){
+                    swal({
+                        title: 'Account Created Successfully!',
+                        text: '',
+                        type: 'success'
+                    }, function(){
+                        location.href = '<?php echo (isset($_REQUEST['_r']) ? urldecode($_REQUEST['_r']) : '/customer/dashboard') ?>';
+                    });
+                }
+            }
+        });
+    }
+    function customerForgotPassword(btn) {
+        let emailAddress = $('#loginEmailAddress').val();
+        if ($.trim(emailAddress).length === 0){
+            swal("Error Encountered!", "You must enter email address.", "error");
+            $('#loginEmailAddress').focus();
+            return false;
+        }
+        $(btn).html('<i class="fa fa-cog fa-spin"></i> Please wait...');
+        $.post(
+            "/customer/forgot-password",
+            {
+                emailAddress: emailAddress
+            },
+            function(d){
+                if(d.error){
+                    swal({
+                        type: 'error',
+                        text: d.errorMessage,
+                        title: 'Error Encountered!'
+                    });
+                }else if(d.success){
+                    swal({
+                        type: 'success',
+                        title: 'Process Completed Successfully!',
+                        text: 'An email containing login details has been sent to your registered email account.'
+                    }, function(){
+                        $(btn).html('Forgot Password?');
+                    });
+                }
+            }
+        );
+    }
+    function resendVerificationEmail(btn){
+        let emailAddress = $('#loginEmailAddress').val();
+        if ($.trim(emailAddress).length === 0){
+            swal("Error Encountered!", "You must enter email address.", "error");
+            $('#loginEmailAddress').focus();
+            return false;
+        }
+        $(btn).html('<i class="fa fa-cog fa-spin"></i> Please wait...');
+        $.post(
+            "/customer/resend-verification-email",
+            {
+                emailAddress: emailAddress
+            },
+            function(d){
+                if(d.error){
+                    swal({
+                        type: 'error',
+                        text: d.errorMessage,
+                        title: 'Error Encountered!'
+                    });
+                }else if(d.success){
+                    swal({
+                        type: 'success',
+                        title: 'Process Completed Successfully!',
+                        text: 'Account verification email has been sent again.'
+                    }, function(){
+                        $(btn).html('Forgot Password?');
+                    });
+                }
+            }
+        );
+    }
+</script>
+<?php }); ?>

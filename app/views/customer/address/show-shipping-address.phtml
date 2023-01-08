@@ -1,0 +1,246 @@
+<div class="mb-3">
+    <a href="#modalAddNewShippingAddress" data-toggle="modal" class="btn btn-primary">
+        <i class="fa fa-plus"></i> Add New Shipping Address
+    </a>
+</div>
+<table class="table table-striped table-bordered">
+    <thead>
+        <tr>
+            <th>S No.</th>
+            <th>Type</th>
+            <th>First Name</th>
+            <th>Last Name</th>
+            <th>Email Address</th>
+            <th>Mobile Number</th>
+            <th>&nbsp;</th>
+        </tr>
+    </thead>
+    <tbody>
+    <?php
+        if(count($data['records']) == 0):
+    ?>
+        <tr>
+            <td colspan="7" class="text-center">
+                <h4>No Shipping Address has been added yet!</h4>
+            </td>
+        </tr>
+    <?php else: ?>
+        <?php $counter = 1; foreach($data['records'] as $record): ?>
+            <tr>
+                <td><?php echo $counter ?>.</td>
+                <td class="text-center">
+                    <?php if($record->getType() == "home"): ?>
+                    <span class="badge badge-primary">Home</span>
+                    <?php elseif($record->getType() == "office"): ?>
+                    <span class="badge badge-info">Office</span>
+                    <?php else: ?>
+                    <span class="badge badge-secondary">Other</span>
+                    <?php endif; ?>
+                </td>
+                <td><?php echo $record->getFirstName() ?></td>
+                <td><?php echo $record->getLastName() ?></td>
+                <td><?php echo $record->getEmailAddress() ?></td>
+                <td><?php echo $record->getMobileNumber() ?></td>
+                <td class="text-right">
+                    <div class="btn-group btn-group-sm">
+                        <a href="#modalViewDetails<?php echo $counter ?>" class="btn btn-primary" data-toggle="modal">
+                            <i class="fa fa-info-circle"></i>
+                        </a>
+                        <div class="modal fade text-left" id="modalViewDetails<?php echo $counter ?>" data-backdrop="static">
+                            <div class="modal-dialog">
+                                <div class="modal-content">
+                                    <div class="modal-header">
+                                        <h5><i class="fa fa-info-circle"></i> Address Details</h5>
+                                    </div>
+                                    <div class="modal-body">
+                                        <table class="table table-striped">
+                                            <tbody>
+                                                <tr>
+                                                    <th>First Name</th>
+                                                    <td><?php echo $record->getFirstName() ?></td>
+                                                </tr>
+                                                <tr>
+                                                    <th>Last Name</th>
+                                                    <td><?php echo $record->getLastName() ?></td>
+                                                </tr>
+                                                <tr>
+                                                    <th>Email Address</th>
+                                                    <td><?php echo $record->getEmailAddress() ?></td>
+                                                </tr>
+                                                <tr>
+                                                    <th>Mobile Number</th>
+                                                    <td><?php echo $record->getMobileNumber() ?></td>
+                                                </tr>
+                                                <tr>
+                                                    <th>Address Line #1</th>
+                                                    <td><?php echo $record->getAddressLine1() ?></td>
+                                                </tr>
+                                                <tr>
+                                                    <th>Address Line #2</th>
+                                                    <td><?php echo $record->getAddressLine2() ?></td>
+                                                </tr>
+                                                <tr>
+                                                    <th>Landmark</th>
+                                                    <td><?php echo $record->getLandmark() ?></td>
+                                                </tr>
+                                                <tr>
+                                                    <th>City</th>
+                                                    <td><?php echo $record->getCity() ?></td>
+                                                </tr>
+                                                <tr>
+                                                    <th>State</th>
+                                                    <td><?php echo $record->getState() ?></td>
+                                                </tr>
+                                                <tr>
+                                                    <th>Country</th>
+                                                    <td><?php echo $record->getCountry() ?></td>
+                                                </tr>
+                                                <tr>
+                                                    <th>Pincode</th>
+                                                    <td><?php echo $record->getPincode() ?></td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                    <div class="modal-footer">
+                                        <button type="button" data-dismiss="modal" class="btn btn-secondary">
+                                            <i class="fa fa-times"></i> Close
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <button type="button" class="btn btn-info" onclick="doRecordAction('edit', <?php echo $record->getId() ?>)">
+                            <i class="fa fa-edit"></i>
+                        </button>
+                        <button type="button" class="btn btn-danger" onclick="doRecordAction('delete', <?php echo $record->getId() ?>)">
+                            <i class="fa fa-times"></i>
+                        </button>
+                    </div>
+                </td>
+            </tr>
+        <?php $counter++; endforeach; ?>
+    <?php endif; ?>
+    </tbody>
+</table>
+
+<!-- Modal: Add New Shipping Address -->
+<form method="post" onsubmit="doAddShippingAddress(this); return false;">
+    <div class="modal fade" id="modalAddNewShippingAddress" data-backdrop="modal">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">
+                        <i class="fa fa-plus"></i> New Shipping Address
+                    </h5>
+                </div>
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label for="type">Address Type</label>
+                        <select class="form-control" name="addressType" id="type" required>
+                            <option value="">--- Select One ---</option>
+                            <option value="home">Home Address</option>
+                            <option value="office">Office Address</option>
+                            <option value="other">Other Address</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="firstName">First Name</label>
+                        <input type="text" name="firstName" id="firstName" class="form-control" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="lastName">Last Name</label>
+                        <input type="text" name="lastName" id="lastName" class="form-control" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="emailAddress">Email Address</label>
+                        <input type="email" name="emailAddress" id="emailAddress" class="form-control" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="mobileNumber">Mobile Number</label>
+                        <input type="text" name="mobileNumber" id="mobileNumber" class="form-control" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="addressLine1">Address Line #1</label>
+                        <input type="text" name="addressLine1" id="addressLine1" class="form-control" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="addressLine2">Address Line #2</label>
+                        <input type="text" name="addressLine2" id="addressLine2" class="form-control" placeholder="( Optional )">
+                    </div>
+                    <div class="form-group">
+                        <label for="landmark">Landmark</label>
+                        <input type="text" name="landmark" id="landmark" class="form-control" required>
+                    </div>
+                    <div class="row">
+                        <div class="col-sm-6">
+                            <div class="form-group">
+                                <label for="city">City</label>
+                                <input type="text" name="city" id="city" class="form-control" required>
+                            </div>
+                        </div>
+                        <div class="col-sm-6">
+                            <div class="form-group">
+                                <label for="state">State</label>
+                                <input type="text" name="state" id="state" class="form-control" required>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-sm-6">
+                            <div class="form-group">
+                                <label for="country">Country</label>
+                                <input type="text" name="country" id="country" class="form-control" required>
+                            </div>
+                        </div>
+                        <div class="col-sm-6">
+                            <div class="form-group">
+                                <label for="pincode">Pincode</label>
+                                <input type="text" name="pincode" id="pincode" class="form-control" required>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fa fa-check"></i> Add
+                    </button>
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">
+                        <i class="fa fa-times"></i> Cancel
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</form>
+
+<?php \OS\helpers\ViewRenderer::registerHook("FooterCode", function(){ ?>
+<script>
+    function doRecordAction(action, recordId){
+        //TODO: code it
+    }
+    function doAddShippingAddress(form){
+        let btn = $(form).find('[type="submit"]');
+        $(btn).html('<i class="fa fa-cog fa-spin"></i> Please wait...');
+        $.post(
+            "/customer/add-shipping-address",
+            $(form).serialize(),
+            function(d){
+                if(d.error){
+                    swal('Error Encountered!', d.errorMessage, 'error');
+                }else if(d.success){
+                    swal({
+                        title: 'Address Added Successfully!',
+                        text: '',
+                        type: 'success'
+                    }, function(){
+                        location["href"] = location.href;
+                    });
+                }
+            }
+        ).always(function(){
+            $(btn).html('<i class="fa fa-check"></i> Add');
+        });
+    }
+</script>
+<?php }); ?>

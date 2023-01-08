@@ -1,0 +1,136 @@
+<div id="modalEditUserWrapper">
+
+    <?php
+        /** @var array $data */
+        if($data['error']):
+    ?>
+    <div id="modalEditUser" class="modal fade" data-backdrop="static">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">
+                        <i class="fa fa-edit"></i> Edit Admin User
+                    </h5>
+                </div>
+                <div class="modal-body">
+                    <p>
+                        <i class="fa fa-exclamation-triangle"></i> Failed to load user data for modification. Please re-try again.
+                    </p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">
+                        <i class="fa fa-times"></i> Close
+                    </button>
+                </div>
+            </div>
+        </div>
+    <?php
+        else:
+            /** @var \OS\models\AdminUser $record */
+            $record = $data['record'];
+
+    ?>
+        <form method="post" onsubmit="doSaveUser(this); return false;">
+            <div id="modalEditUser" class="modal fade" data-backdrop="static">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title">
+                                <i class="fa fa-edit"></i> Edit Admin User
+                            </h5>
+                        </div>
+                        <div class="modal-body">
+                            <p>All fields are mandatory.</p>
+                            <div class="form-group row">
+                                <label class="col-form-label col-sm-4" for="eUserName">User Name:</label>
+                                <div class="col-sm-8">
+                                    <input class="form-control" id="eUserName" name="userName" required type="text"
+                                           value="<?php echo $record->getName() ?>">
+                                </div>
+                            </div>
+                            <div class="form-group row">
+                                <label class="col-form-label col-sm-4" for="eUserEmail">Email Address:</label>
+                                <div class="col-sm-8">
+                                    <input class="form-control" id="eUserEmail" name="userEmail" required type="email"
+                                        value="<?php echo $record->getEmailAddress() ?>">
+                                </div>
+                            </div>
+                            <div class="form-group row">
+                                <label class="col-form-label col-sm-4" for="password">Account Active?</label>
+                                <div class="col-sm-8">
+                                    <div class="custom-control custom-radio custom-control-inline">
+                                        <input type="radio" id="eRadioIsActiveYes" name="isActive" value="yes" <?php if($record->getIsActive()): ?>checked<?php endif; ?> class="custom-control-input">
+                                        <label class="custom-control-label" for="eRadioIsActiveYes">Yes, Account Active</label>
+                                    </div>
+                                    <div class="custom-control custom-radio custom-control-inline">
+                                        <input type="radio" id="eRadioIsActiveNo" name="isActive" value="no" <?php if(!$record->getIsActive()): ?>checked<?php endif; ?> class="custom-control-input">
+                                        <label class="custom-control-label" for="eRadioIsActiveNo">No, Account Disabled</label>
+                                    </div>
+                                </div>
+                            </div>
+                            <br />
+                            <p>Only Specify password, if you want to change.</p>
+                            <div class="form-group row">
+                                <label class="col-form-label col-sm-4" for="ePassword">Password:</label>
+                                <div class="col-sm-8">
+                                    <input type="password" name="password" id="ePassword" class="form-control" required minlength="8">
+                                </div>
+                            </div>
+                            <div class="form-group row">
+                                <label class="col-form-label col-sm-4" for="eConfirmPassword">Confirm Password:</label>
+                                <div class="col-sm-8">
+                                    <input type="password" name="confirmPassword" id="eConfirmPassword" class="form-control" required minlength="8">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button id="btnAddUser" type="submit" class="btn btn-primary">
+                                <i class="fa fa-check"></i> Add
+                            </button>
+                            <button type="button" class="btn btn-secondary" data-dismiss="modal">
+                                <i class="fa fa-times"></i> Cancel
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </form>
+
+        <script>
+            function doSaveUser(form){
+                $.ajax({
+                    url: '/admin/admin-user/save/<?php echo $data['record']->getId(); ?>',
+                    type: 'post',
+                    dataType: 'json',
+                    data: $(form).serialize(),
+                    beforeSend: function(){
+                        $('#btnAddUser').html('<i class="fa fa-cog fa-spin"></i> Please wait...');
+                    },
+                    complete: function(){
+                        $('#btnAddUser').html('<i class="fa fa-check"></i> Add');
+                    },
+                    success: function(d){
+                        if(d.error){
+                            swal('Error Encoutnered!', d.errorMessage, 'error');
+                        }else if(d.success){
+                            swal({
+                                title: 'User Saved Successfully!',
+                                text: '',
+                                type: 'success'
+                            }, function(){
+                                location['href'] = location.href;
+                            });
+                        }
+                    }
+                });
+            }
+        </script>
+    <?php endif; ?>
+
+    <script>
+        $('#modalEditUser').on('hidden.bs.modal', function(){
+            $('#modalEditUserWrapper').remove();
+        });
+    </script>
+
+</div>

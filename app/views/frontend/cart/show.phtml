@@ -1,0 +1,142 @@
+<div class="container">
+    <h2 class="text-center">
+        <i class="fa fa-shopping-cart"></i>
+        Your Cart
+    </h2>
+    <hr />
+    <?php if($data["error"]): ?>
+        <div class="alert alert-danger">
+            <i class="fa fa-exclamation-triangle"></i> Something went wrong while loading cart.
+            Please refresh page to try again.
+        </div>
+    <?php endif; ?>
+    <?php if(count($data['products']) == 0): ?>
+        <div class="text-center mb-5 mt-5">
+            <h3>Your cart is empty</h3>
+            <a href="/" class="btn btn-primary">Shop Now</a>
+        </div>
+    <?php else: ?>
+        <table class="table table-bordered">
+            <thead class="bg-dark text-light">
+                <tr>
+                    <th style="width: 10%">
+                        <button type="button" class="btn btn-primary btn-sm" onclick="clearCart()">Clear All</button>
+                    </th>
+                    <th>Product</th>
+                    <th>Price</th>
+                    <th>Qty.</th>
+                    <th>Total</th>
+                </tr>
+            </thead>
+            <tbody>
+                <?php $counter = 1; foreach ($data['products'] as $entry): ?>
+                    <tr>
+                        <td>
+                            <button type="button" class="btn btn-danger btn-sm" onclick="removeItem(<?php echo $entry['id'] ?>)">
+                                <i class="fa fa-times"></i>
+                            </button>
+                        </td>
+                        <td>
+                            <img alt="" src="/uploads/<?php echo $entry['image'] ?>" class="mr-2" style="max-height: 50px" />
+                            <?php echo $entry['name'] ?>
+                        </td>
+                        <td><i class="fa fa-rupee"></i> <?php echo number_format($entry['price'], 2) ?></td>
+                        <td class="text-center">
+                            <?php echo $entry['qty'] ?>
+                        </td>
+                        <td class="text-right">
+                            <i class="fa fa-rupee"></i> <?php echo number_format($entry['total'], 2) ?>
+                        </td>
+                    </tr>
+                <?php endforeach; ?>
+            </tbody>
+            <tfoot class="bg-light">
+                <tr>
+                    <td colspan="4" class="text-right">
+                        <strong>Cart Total:</strong>
+                    </td>
+                    <td class="text-right">
+                        <i class="fa fa-rupee"></i>
+                        <?php echo number_format($data['totalAmount'], 2); ?>
+                    </td>
+                </tr>
+                <tr>
+                    <td colspan="4" class="text-right">
+                        <strong>Total Taxes:</strong>
+                    </td>
+                    <td class="text-right">
+                        <i class="fa fa-rupee"></i>
+                        <?php echo number_format($data['totalTaxes'], 2); ?>
+                    </td>
+                </tr>
+                <tr>
+                    <td colspan="4" class="text-right">
+                        <strong>Shipping Charges:</strong>
+                    </td>
+                    <td class="text-right">
+                        <i class="fa fa-rupee"></i>
+                        <?php echo number_format($data['shippingCharges'], 2); ?>
+                    </td>
+                </tr>
+                <tr class="bg-dark text-light">
+                    <td colspan="4" class="text-right">
+                        <strong>Grand Total:</strong>
+                    </td>
+                    <td class="text-right">
+                        <i class="fa fa-rupee"></i>
+                        <?php echo number_format(($data['totalAmount'] + $data['totalTaxes'] + $data['shippingCharges']), 2); ?>
+                    </td>
+                </tr>
+            </tfoot>
+        </table>
+        <div class="text-right">
+            <a href="/customer/checkout" class="btn btn-primary btn-lg">
+                <i class="fa fa-check"></i> Place Order
+            </a>
+        </div>
+    <?php endif; ?>
+</div>
+
+<?php \OS\helpers\ViewRenderer::registerHook("FooterCode", function(){ ?>
+<script>
+    function removeItem(pid){
+        if(!confirm("Are you sure to remove this item from cart?")) return;
+        $.ajax({
+            url: "/cart/remove/" + pid,
+            type: "post",
+            dataType: "json",
+            beforeSend: function(){
+                NProgress.start();
+            },
+            complete: function (){
+                NProgress.done();
+            },
+            success: function(d){
+                if(d.success){
+                    location['href'] = location.href;
+                }
+            }
+        });
+    }
+    function clearCart(){
+        if(!confirm("Are you sure to clear cart?")) return;
+        $.ajax({
+            url: "/cart/clear",
+            type: "post",
+            dataType: "json",
+            beforeSend: function(){
+                NProgress.start();
+            },
+            complete: function (){
+                NProgress.done();
+            },
+            success: function(d){
+                if(d.success){
+                    location['href'] = location.href;
+                }
+            }
+        });
+    }
+</script>
+
+<?php }); ?>

@@ -1,0 +1,8 @@
+<?php if($data['customer']->getAccountVerified() === false): ?>
+    <div class="alert alert-warning">
+        <i class="fa fa-exclamation-triangle"></i>
+        Your account is not verified. Please check your registered email address for verification.
+        If not verified, your account will be deactivated.
+    </div>
+<?php endif; ?>
+<h1>Customer Dashboard</h1>

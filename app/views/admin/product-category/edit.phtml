@@ -1,0 +1,118 @@
+<div id="editCategoryWrapper">
+    
+    <?php if($data['error']): ?>
+        <div class="modal fade" id="modalEditProductCategory" data-backdrop="static">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header bg-danger text-white">
+                        <i class="fa fa-exclamation-triangle"></i> Error Encountered!
+                    </div>
+                    <div class="modal-body">
+                        <p>Failed to load product category details for modification. Please close this dialog and try once again.</p>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-dismiss="">
+                            <i class="fa fa-times"></i> Close
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    <?php else: ?>
+    <form method="post" onsubmit="doSaveProductCategory(this); return false;">
+        <div class="modal fade" id="modalEditProductCategory" data-backdrop="static">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">
+                            <i class="fa fa-edit"></i> Edit Category
+                        </h5>
+                    </div>
+                    <div class="modal-body">
+                        <div class="form-group row">
+                            <label class="col-form-label col-sm-4" for="eCategoryName">Category Name:</label>
+                            <div class="col-sm-8">
+                                <input type="text" name="categoryName" id="eCategoryName" class="form-control" value="<?php echo $data['productCategory']->getName() ?>" required>
+                            </div>
+                        </div>
+                        <div class="form-group row">
+                            <label class="col-form-label col-sm-4" for="eCategoryDescription">Description:</label>
+                            <div class="col-sm-8">
+                                <textarea id="eCategoryDescription" name="categoryDescription" placeholder="( Optional )" class="form-control" rows="3"
+                                          ><?php echo $data['productCategory']->getDescription() ?></textarea>
+                            </div>
+                        </div>
+                        <div class="form-group row">
+                            <label class="col-form-label col-sm-4">Is Active?</label>
+                            <div class="col-sm-8">
+                                <div class="custom-control custom-radio custom-control-inline">
+                                    <input type="radio" id="eIsActiveYes" name="isActive" value="yes" 
+                                           <?php if($data['productCategory']->getIsActive()): ?>checked=""<?php endif; ?>
+                                           class="custom-control-input">
+                                    <label class="custom-control-label" for="eIsActiveYes">Activate It</label>
+                                </div>
+                                <div class="custom-control custom-radio custom-control-inline">
+                                    <input type="radio" id="eIsActiveNo" name="isActive" value="no" 
+                                           <?php if(!$data['productCategory']->getIsActive()): ?>checked=""<?php endif; ?>
+                                           class="custom-control-input">
+                                    <label class="custom-control-label" for="eIsActiveNo">Disable It</label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="submit" id="btnSaveCategory" class="btn btn-primary">
+                            <i class="fa fa-check"></i> Save
+                        </button>
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">
+                            <i class="fa fa-times"></i> Cancel
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </form>
+    
+    <script>
+        function doSaveProductCategory(form){
+            $.ajax({
+                url: '/admin/product-category/save/<?php echo $data['productCategory']->getId() ?>',
+                type: 'post',
+                dataType: 'json',
+                data: $(form).serialize(),
+                beforeSend: function(){
+                    $('#btnSaveCategory').html('<i class="fa fa-cog fa-spin"></i> Please wait...');
+                },
+                complete: function(){
+                    $('#btnSaveCategory').html('<i class="fa fa-check"></i> Save');
+                },
+                success: function(response){
+                    if(response.error){
+                        swal({
+                            title: 'Error Encountered!',
+                            text: response.errorMessage,
+                            type: 'error'
+                        });
+                    }else if(response.success){
+                        swal({
+                            title: 'Product Category Saved Successfully!',
+                            text: '',
+                            type: 'success'
+                        }, function(){
+                            location['href'] = location.href;
+                        });
+                    }
+                }
+            });
+        }
+    </script>
+    
+    <?php endif; ?>
+    
+    <script>
+        $('#modalEditProductCategory').on('hidden.bs.modal', function(){
+            $('#editCategoryWrapper').remove();
+        });
+    </script>
+    
+</div>

@@ -1,0 +1,231 @@
+<?php
+    /** @var array $data */
+    /** @var string $content */
+$abc = "jhakjdhka";
+?>
+<!doctype html>
+<html lang="en">
+<head>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootswatch/4.6.0/flatly/bootstrap.min.css" integrity="sha512-5bGVgbI2xuyCes5Q7colxgLChuX/2lidwyC6zFo0Fu7Nb46xf55YcMwojQel2JBxaJoa3w0d14dKek6TbGROfQ==" crossorigin="anonymous" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css" integrity="sha512-SfTiTlX6kk+qitfevl/7LibUOeJWlt9rbyDn92a1DqWOw9vWG2MFoays0sgObmWazO5BQPiFucnnEAjpAB+/Sw==" crossorigin="anonymous" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-sweetalert/1.0.1/sweetalert.min.css" integrity="sha512-hwwdtOTYkQwW2sedIsbuP1h0mWeJe/hFOfsvNKpRB3CkRxq8EW7QMheec1Sgd8prYxGm1OM9OZcGW7/GUud5Fw==" crossorigin="anonymous" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/nprogress/0.2.0/nprogress.min.css" integrity="sha512-42kB9yDlYiCEfx2xVwq0q7hT4uf26FUgSIZBK8uiaEnTdShXjwr8Ip1V4xGJMg3mHkUt9nNuTDxunHF0/EgxLQ==" crossorigin="anonymous" />
+
+    <title><?php echo ($data['pageTitle'] ?? ''); ?>  | Admin Panel</title>
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+        <a class="navbar-brand" href="/admin/dashboard">Online Shop</a>
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarColor01" aria-controls="navbarColor01" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+
+        <div class="collapse navbar-collapse" id="navbarColor01">
+            <ul class="navbar-nav mr-auto">
+                <li class="nav-item <?php if($data['currentMenuItem'] === 'dashboard'): ?>active<?php endif; ?>">
+                    <a class="nav-link" href="/admin/dashboard">Dashboard
+                        <span class="sr-only">(current)</span>
+                    </a>
+                </li>
+                <li class="nav-item <?php if($data['currentMenuItem'] === 'product'): ?>active<?php endif; ?>">
+                    <a class="nav-link" href="/admin/product/list">Products
+                        <span class="sr-only">(current)</span>
+                    </a>
+                </li>
+                <li class="nav-item <?php if($data['currentMenuItem'] === 'category'): ?>active<?php endif; ?>">
+                    <a class="nav-link" href="/admin/product-category/list">Categories
+                        <span class="sr-only">(current)</span>
+                    </a>
+                </li>
+                <li class="nav-item <?php if($data['currentMenuItem'] === 'customer'): ?>active<?php endif; ?>">
+                    <a class="nav-link" href="/admin/customer/list">Customers
+                        <span class="sr-only">(current)</span>
+                    </a>
+                </li>
+                <li class="nav-item <?php if($data['currentMenuItem'] === 'order'): ?>active<?php endif; ?>">
+                    <a class="nav-link" href="/admin/order/list">Orders
+                        <span class="sr-only">(current)</span>
+                    </a>
+                </li>
+                <li class="nav-item <?php if($data['currentMenuItem'] === 'support'): ?>active<?php endif; ?>">
+                    <a class="nav-link" href="/admin/support/list">Support
+                        <span class="sr-only">(current)</span>
+                    </a>
+                </li>
+                <li class="nav-item <?php if($data['currentMenuItem'] === 'contact'): ?>active<?php endif; ?>">
+                    <a class="nav-link" href="/admin/contact/list">Contact
+                        <span class="sr-only">(current)</span>
+                    </a>
+                </li>
+                <?php if($_SESSION['isSuperAdmin']): ?>
+                <li class="nav-item <?php if($data['currentMenuItem'] === 'adminUser'): ?>active<?php endif; ?>">
+                    <a class="nav-link" href="/admin/admin-user/list">Users
+                        <span class="sr-only">(current)</span>
+                    </a>
+                </li>
+                <?php endif; ?>
+            </ul>
+            <div class="ml-auto">
+                <div class="dropdown">
+                    <a class="nav-link dropdown-toggle" data-toggle="dropdown" href="#" role="button" aria-haspopup="true" aria-expanded="false">
+                        <i class="fa fa-user"></i> <?php echo $_SESSION['adminUserName'] ?>
+                    </a>
+                    <div class="dropdown-menu" style="">
+                        <a class="dropdown-item" href="#modalChangePassword" data-toggle="modal">Change Password</a>
+                        <a class="dropdown-item" href="javascript: void(0);" onclick="loadEditProfile()">Edit Profile</a>
+                        <div class="dropdown-divider"></div>
+                        <a class="dropdown-item" href="javascript: void(0);" onclick="logout()">SignOut</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <br />
+
+    <div class="container">
+        <?php echo $content ?>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.min.js" integrity="sha512-bLT0Qm9VnAYZDflyKcBaQ2gg0hSYNQrJ8RilYldYQ1FxQYoCLtUjuuRuZo+fjqhx/qtq/1itJ0C2ejDxltZVFg==" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.6.0/js/bootstrap.bundle.min.js" integrity="sha512-wV7Yj1alIZDqZFCUQJy85VN+qvEIly93fIQAN7iqDFCPEucLCeNFz4r35FCo9s6WrpdDQPi80xbljXB8Bjtvcg==" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-sweetalert/1.0.1/sweetalert.min.js" integrity="sha512-MqEDqB7me8klOYxXXQlB4LaNf9V9S0+sG1i8LtPOYmHqICuEZ9ZLbyV3qIfADg2UJcLyCm4fawNiFvnYbcBJ1w==" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/nprogress/0.2.0/nprogress.min.js" integrity="sha512-bUg5gaqBVaXIJNuebamJ6uex//mjxPk8kljQTdM1SwkNrQD7pjS+PerntUSD+QRWPNJ0tq54/x4zRV8bLrLhZg==" crossorigin="anonymous"></script>
+
+    <!-- Modal: Change Password -->
+    <form method="post" onsubmit="doChangePassword(this); return false;">
+        <input type="hidden" name="recordAction" value="changePassword">
+        <div class="modal fade" id="modalChangePassword" data-backdrop="static">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">
+                            <i class="fa fa-edit"></i> Change Password
+                        </h5>
+                    </div>
+                    <div class="modal-body">
+                        <div class="form-group row">
+                            <label class="col-form-label col-sm-4" for="currentPassword">Current Password:</label>
+                            <div class="col-sm-8">
+                                <input type="password" name="currentPassword" id="currentPassword" class="form-control" required>
+                            </div>
+                        </div>
+                        <div class="form-group row">
+                            <label class="col-form-label col-sm-4" for="newPassword">New Password:</label>
+                            <div class="col-sm-8">
+                                <input type="password" name="newPassword" id="newPassword" class="form-control" required>
+                            </div>
+                        </div>
+                        <div class="form-group row">
+                            <label class="col-form-label col-sm-4" for="rePassword">Re-Enter Password:</label>
+                            <div class="col-sm-8">
+                                <input type="password" name="rePassword" id="rePassword" class="form-control" required>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button id="btnChangePassword" type="submit" class="btn btn-primary">
+                            <i class="fa fa-check"></i> Change
+                        </button>
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">
+                            <i class="fa fa-times"></i> Cancel
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </form>
+
+    <script>
+        function logout(){
+            if(!confirm('Are you sure to logout?')) return;
+            $.ajax({
+                url: '/admin/logout',
+                type: 'POST',
+                dataType: 'json',
+                data: { recordAction: 'logout' },
+                beforeSend: function(){
+                    NProgress.start();
+                },
+                success: function(response){
+                    if(response.error){
+                        swal({
+                            title: 'Error Encountered!',
+                            text: response.errorMessage,
+                            type: 'error'
+                        });
+                    }else if(response.success){
+                        swal({
+                            title: 'Logged Out Successfully!',
+                            text: '',
+                            type: 'success'
+                        }, function(){
+                            location.href = "/admin/login";
+                        });
+                    }
+                },
+                complete: function(){
+                    NProgress.done();
+                }
+            });
+        }
+        function loadEditProfile(){
+            $.ajax({
+                url: '/admin/edit-profile',
+                type: 'get',
+                dataType: 'html',
+                beforeSend: function(){
+                    NProgress.start();
+                },
+                complete: function(){
+                    NProgress.done();
+                },
+                success: function(response){
+                    $('body').append(response);
+                    let modal = $('#modalEditProfile');
+                    if(modal.length > 0)
+                        modal.modal('show');
+                }
+            });
+        }
+        function doChangePassword(form){
+            $.ajax({
+                url: '/admin/change-password',
+                type: 'post',
+                dataType: 'json',
+                data: $(form).serialize(),
+                beforeSend: function(){
+                    $('#btnChangePassword').html('<i class="fa fa-cog fa-spin"></i> Please wait...');
+                },
+                complete: function(){
+                    $('#btnChangePassword').html('<i class="fa fa-check"></i> Change');
+                },
+                success: function(response){
+                    if(response.error){
+                        swal({
+                            title: 'Error Encountered!',
+                            text: response.errorMessage,
+                            type: 'error'
+                        });
+                    }else if(response.success){
+                        swal({
+                            title: 'Password Changed Successfully',
+                            text: 'You have been logged out automatically for security reason and will be redirected to login page. Please re-login again to continue.',
+                            type: 'success'
+                        }, function(){
+                            location.href = '/test-slim-project/login';
+                        });
+                    }
+                }
+            });
+        }
+    </script>
+
+    <?php \OS\helpers\ViewRenderer::renderHook('FooterCode'); ?>
+
+</body>
+</html>
